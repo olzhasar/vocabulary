@@ -11,7 +11,3 @@ class UserInSchema(UserSchema):
 
 class UserOutSchema(UserSchema):
     pass
-
-
-class UserDBSchema(UserSchema):
-    password_hash: str
