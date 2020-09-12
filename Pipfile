@@ -7,10 +7,15 @@ verify_ssl = true
 black = "*"
 isort = "*"
 flake8 = "*"
+pytest = "*"
+factory-boy = "*"
 
 [packages]
-flask = "*"
-flask-sqlalchemy = "*"
+fastapi = "*"
+uvicorn = "*"
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true
