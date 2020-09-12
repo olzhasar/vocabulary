@@ -18,6 +18,7 @@ databases = {extras = ["postgresql"], version = "*"}
 alembic = "*"
 aiohttp = "*"
 python-dotenv = "*"
+bcrypt = "*"
 
 [requires]
 python_version = "3.8"
