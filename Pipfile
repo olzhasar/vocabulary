@@ -16,6 +16,7 @@ uvicorn = "*"
 sqlalchemy = "*"
 databases = {extras = ["postgresql"], version = "*"}
 alembic = "*"
+aiohttp = "*"
 
 [requires]
 python_version = "3.8"
