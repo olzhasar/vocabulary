@@ -19,6 +19,7 @@ alembic = "*"
 aiohttp = "*"
 python-dotenv = "*"
 bcrypt = "*"
+pydantic = {extras = ["email"], version = "*"}
 
 [requires]
 python_version = "3.8"
