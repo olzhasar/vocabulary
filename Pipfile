@@ -13,6 +13,9 @@ factory-boy = "*"
 [packages]
 fastapi = "*"
 uvicorn = "*"
+sqlalchemy = "*"
+databases = {extras = ["postgresql"], version = "*"}
+alembic = "*"
 
 [requires]
 python_version = "3.8"
