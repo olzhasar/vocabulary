@@ -17,6 +17,7 @@ sqlalchemy = "*"
 databases = {extras = ["postgresql"], version = "*"}
 alembic = "*"
 aiohttp = "*"
+python-dotenv = "*"
 
 [requires]
 python_version = "3.8"
