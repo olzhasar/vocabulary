@@ -1,15 +1,24 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
+from db import db, metadata, sqlalchemy
+from db.sqlalchemy import Column, Integer, String
 
-Base = declarative_base()
+users = sqlalchemy.Table(
+    "users",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("email", String(255), nullable=False, index=True, unique=True),
+    Column("password_hash", String(100), nullable=False),
+)
 
 
-class User(Base):
-    __tablename__ = "users"
+class User:
+    @classmethod
+    async def get(cls, id):
+        query = users.select().where(users.c.id == id)
+        user = await db.fetch_one(query)
+        return user
 
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255), nullable=False, index=True, unique=True)
-    password_hash = Column(
-        String(100),
-        nullable=False,
-    )
+    @classmethod
+    async def create(cls, **kwargs):
+        query = users.insert().values(**kwargs)
+        user_id = await db.execute(query)
+        return user_id
