@@ -8,7 +8,7 @@ from utils import hash_password
 users = sa.Table(
     "users",
     metadata,
-    sa.Column("id", sa.Integer, primary_key=True),
+    sa.Column("id", sa.Integer, primary_key=True, index=True),
     sa.Column("email", sa.String(255), nullable=False, index=True, unique=True),
     sa.Column("password_hash", sa.String(100), nullable=False),
 )
