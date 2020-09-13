@@ -14,6 +14,14 @@ users = sa.Table(
 )
 
 
+words = sa.Table(
+    "words",
+    metadata,
+    sa.Column("id", sa.Integer, primary_key=True, index=True),
+    sa.Column("word", sa.String(50), nullable=False, index=True, unique=True),
+)
+
+
 class User:
     @classmethod
     async def get(cls, id):
