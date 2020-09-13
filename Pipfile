@@ -16,7 +16,7 @@ uvicorn = "*"
 sqlalchemy = "*"
 databases = {extras = ["postgresql"], version = "*"}
 alembic = "*"
-aiohttp = "*"
+aiohttp = {extras = ["speedups"], version = "*"}
 python-dotenv = "*"
 bcrypt = "*"
 pydantic = {extras = ["email"], version = "*"}
