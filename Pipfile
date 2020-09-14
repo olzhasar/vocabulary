@@ -19,6 +19,7 @@ alembic = "*"
 aiohttp = {extras = ["speedups"], version = "*"}
 bcrypt = "*"
 pydantic = {extras = ["dotenv", "email"], version = "*"}
+pytest-asyncio = "*"
 
 [requires]
 python_version = "3.8"
