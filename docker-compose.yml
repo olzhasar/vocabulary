@@ -9,6 +9,11 @@ services:
       - POSTGRES_DB=vocabulary
     volumes:
       - /tmp/vocabulary/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   web:
     build: .
     command: bash -c 'alembic upgrade head && uvicorn --host 0.0.0.0 --port 8000 --reload main:app'
@@ -17,4 +22,5 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
