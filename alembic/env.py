@@ -25,8 +25,10 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-import users.models
-from db import metadata
+
+import users.models  # noqa F401
+import words.models  # noqa F401
+from db import metadata  # noqa E402
 
 target_metadata = metadata
 
