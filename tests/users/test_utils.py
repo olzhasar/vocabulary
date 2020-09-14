@@ -1,6 +1,6 @@
 import pytest
 
-from utils import hash_password
+from users.utils import hash_password
 
 
 @pytest.mark.parametrize("password", ["123", "ASGIJASBOMAS", "90gjsjg0wu@!)($3gj3)"])

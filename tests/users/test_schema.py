@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from schema import SignupSchema
+from users.schema import SignupSchema
 
 
 def test_signup_schema():
