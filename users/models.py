@@ -3,7 +3,8 @@ from fastapi import HTTPException
 
 from db import db, metadata
 from db import sqlalchemy as sa
-from utils import hash_password
+
+from .utils import hash_password
 
 users = sa.Table(
     "users",

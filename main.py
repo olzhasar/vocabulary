@@ -1,8 +1,8 @@
 import uvicorn
 
 from app import app
-from models import User
-from schema import UserInSchema, UserOutSchema
+from users.models import User
+from users.schema import UserInSchema, UserOutSchema
 from words_api import WordsAPIClient
 
 
