@@ -5,7 +5,9 @@ class Settings(BaseSettings):
     TESTING: bool = False
 
     DATABASE_URL: str = "postgresql://postgres:postgres@db:5432/vocabulary"
-    TEST_DATABASE_URL: str = "postgresql://postgres:postgres@db:5432/vocabulary_test"
+    TEST_DATABASE_URL: str = (
+        "postgresql://vocabulary:vocabulary@localhost:5432/vocabulary_test"
+    )
 
     WORDS_API_KEY: str
 
