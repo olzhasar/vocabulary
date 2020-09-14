@@ -1,8 +1,9 @@
 import asyncio
-import os
 
 import aiohttp
 from fastapi import HTTPException
+
+from settings import settings
 
 
 class WordsAPIClient:
@@ -11,7 +12,7 @@ class WordsAPIClient:
     base_url = "https://wordsapiv1.p.rapidapi.com"
     headers = {
         "x-rapidapi-host": "wordsapiv1.p.rapidapi.com",
-        "x-rapidapi-key": os.environ["WORDS_API_KEY"],
+        "x-rapidapi-key": settings.WORDS_API_KEY,
     }
 
     @classmethod

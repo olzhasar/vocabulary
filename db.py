@@ -2,10 +2,14 @@ import os
 
 import sqlalchemy
 from databases import Database
-from dotenv import load_dotenv
+
+from settings import settings
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-db = Database(os.environ["DATABASE_URL"])
+if settings.TESTING:
+    db = Database(settings.TEST_DATABASE_URL, force_rollback=True)
+else:
+    db = Database(settings.DATABASE_URL)
+
 metadata = sqlalchemy.MetaData()
