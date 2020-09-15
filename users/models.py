@@ -40,3 +40,7 @@ class User:
         except UniqueViolationError:
             raise HTTPException(400, "User with this email already exists")
         return user_id
+
+    @classmethod
+    async def authenticate(cls, password: str):
+        pass
