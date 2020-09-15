@@ -17,8 +17,15 @@ users = sa.Table(
 
 class User:
     @classmethod
-    async def get(cls, id):
-        query = users.select().where(users.c.id == id)
+    async def get(cls, id=None, email=None):
+        conditions = []
+        if id:
+            conditions.append(users.c.id == id)
+        if email:
+            conditions.append(users.c.email == email)
+        if not conditions:
+            raise HTTPException(400, "Either id or email must be provided")
+        query = users.select().where(*conditions)
         user = await db.fetch_one(query)
         if not user:
             raise HTTPException(404, "User not found")
