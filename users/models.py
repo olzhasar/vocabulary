@@ -17,7 +17,7 @@ users = sa.Table(
 
 class User:
     @classmethod
-    async def get(cls, id=None, email=None):
+    async def get(cls, *, id=None, email=None):
         conditions = []
         if id:
             conditions.append(users.c.id == id)

@@ -20,6 +20,7 @@ aiohttp = {extras = ["speedups"], version = "*"}
 bcrypt = "*"
 pydantic = {extras = ["dotenv", "email"], version = "*"}
 pytest-asyncio = "*"
+python-multipart = "*"
 
 [requires]
 python_version = "3.8"
