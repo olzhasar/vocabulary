@@ -14,13 +14,13 @@ factory-boy = "*"
 fastapi = "*"
 uvicorn = "*"
 sqlalchemy = "*"
-databases = {extras = ["postgresql"], version = "*"}
 alembic = "*"
 aiohttp = {extras = ["speedups"], version = "*"}
 bcrypt = "*"
 pydantic = {extras = ["dotenv", "email"], version = "*"}
 pytest-asyncio = "*"
 python-multipart = "*"
+gino = {extras = ["starlette"], version = "*"}
 
 [requires]
 python_version = "3.8"
