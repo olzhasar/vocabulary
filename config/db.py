@@ -1,9 +1,9 @@
 from gino.ext.starlette import Gino
 
-from settings import settings
+from .settings import DB_DSN, settings
 
 db = Gino(
-    dsn=settings.DB_DSN,
+    dsn=DB_DSN,
     pool_min_size=settings.DB_POOL_MIN_SIZE,
     pool_max_size=settings.DB_POOL_MAX_SIZE,
     echo=settings.DB_ECHO,

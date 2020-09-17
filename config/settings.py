@@ -1,5 +1,9 @@
+import os
+
 from pydantic import BaseSettings
 from sqlalchemy.engine.url import URL
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class Settings(BaseSettings):
@@ -12,15 +16,6 @@ class Settings(BaseSettings):
     DB_PASSWORD: str = "postgres"
     DB_DATABASE: str = "vocabulary"
 
-    DB_DSN = URL(
-        drivername=DB_DRIVER,
-        username=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        port=DB_PORT,
-        database=DB_DATABASE,
-    )
-
     DB_POOL_MIN_SIZE: int = 1
     DB_POOL_MAX_SIZE: int = 16
     DB_ECHO: bool = False
@@ -31,4 +26,13 @@ class Settings(BaseSettings):
     WORDS_API_KEY: str
 
 
-settings = Settings(_env_file=".env")
+settings = Settings(_env_file=os.path.join(BASE_DIR, ".env"))
+
+DB_DSN = URL(
+    drivername=settings.DB_DRIVER,
+    username=settings.DB_USER,
+    password=settings.DB_PASSWORD,
+    host=settings.DB_HOST,
+    port=settings.DB_PORT,
+    database=settings.DB_DATABASE,
+)
