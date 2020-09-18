@@ -3,7 +3,6 @@ import pytest
 from db.models import User
 
 
-@pytest.mark.asyncio
 class TestUser:
     @pytest.mark.parametrize(
         "password", ["Password", "123qweasd", "QWERTY~!@#$%^"]
@@ -13,8 +12,9 @@ class TestUser:
         assert hashed
         assert hashed != password
 
+    @pytest.mark.asyncio
     async def test_create(self, use_db):
-        user = await User.create(
+        await User.create(
             id=1, email="info@example.com", password_hash="123qweasd"
         )
 
