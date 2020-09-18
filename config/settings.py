@@ -14,7 +14,9 @@ class Settings(BaseSettings):
     DB_PORT: str = "5432"
     DB_USER: str = "postgres"
     DB_PASSWORD: str = "postgres"
+
     DB_DATABASE: str = "vocabulary"
+    DB_TEST_DATABASE: str = "vocabulary_test"
 
     DB_POOL_MIN_SIZE: int = 1
     DB_POOL_MAX_SIZE: int = 16
@@ -28,11 +30,14 @@ class Settings(BaseSettings):
 
 settings = Settings(_env_file=os.path.join(BASE_DIR, ".env"))
 
+DB_DATABASE = (
+    settings.DB_TEST_DATABASE if settings.TESTING else settings.DB_DATABASE
+)
 DB_DSN = URL(
     drivername=settings.DB_DRIVER,
     username=settings.DB_USER,
     password=settings.DB_PASSWORD,
     host=settings.DB_HOST,
     port=settings.DB_PORT,
-    database=settings.DB_DATABASE,
+    database=DB_DATABASE,
 )

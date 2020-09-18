@@ -1,6 +1,6 @@
 import pytest
 
-from users.models import User
+from db.models import User
 
 
 @pytest.mark.asyncio
@@ -14,12 +14,15 @@ class TestUser:
         assert hashed != password
 
     async def test_create(self, use_db):
-        user = await User.objects.create(
+        user = await User.create(
             id=1, email="info@example.com", password_hash="123qweasd"
         )
 
-        user = await user.load()
+        assert await User.get(1)
 
-        user_from_db = await User.get(email="info@example.com")
+        user_from_db = await User.query.where(
+            User.email == "info@example.com"
+        ).gino.first()
 
         assert user_from_db.id == 1
+        assert user_from_db.email == "info@example.com"

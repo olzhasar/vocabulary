@@ -5,7 +5,11 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+MIGRATIONS_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_DIR = os.path.dirname(MIGRATIONS_DIR)
+BASE_DIR = os.path.dirname(DB_DIR)
+
+sys.path.append(BASE_DIR)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -15,16 +19,13 @@ config = context.config
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
 
-
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-# from app import load_modules
-from config.db import db
 from config.settings import DB_DSN
+from db import db, models
 
-# load_modules()
 config.set_main_option("sqlalchemy.url", str(DB_DSN))
 target_metadata = db
 

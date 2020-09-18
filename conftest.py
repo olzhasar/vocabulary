@@ -1,27 +1,18 @@
 import pytest
 
-from settings import settings
+from config.settings import DB_DSN, settings
 
-settings.DATABASE_URL = settings.TEST_DATABASE_URL
-
-
-@pytest.fixture(scope="session")
-def monkeysession(request):
-    from _pytest.monkeypatch import MonkeyPatch
-
-    mpatch = MonkeyPatch()
-    yield mpatch
-    mpatch.undo()
+settings.TESTING = True
 
 
 @pytest.fixture
 async def use_db():
-    from db import db, metadata
+    from db import db
 
-    metadata.bind = settings.TEST_DATABASE_URL
-    metadata.create_all()
+    await db.set_bind(DB_DSN)
+    await db.gino.create_all()
 
-    async with db:
-        yield
+    yield
 
-    metadata.drop_all()
+    await db.gino.drop_all()
+    await db.pop_bind().close()
