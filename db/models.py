@@ -19,7 +19,9 @@ class User(db.Model):
         return hashed.decode("utf-8")
 
     def check_password(self, password: str) -> bool:
-        return self.password_hash == self.hash_password(password)
+        return bcrypt.checkpw(
+            password.encode("utf-8"), self.password_hash.encode("utf-8")
+        )
 
     def set_password(self, raw_password):
         self.password_hash = self.hash_password(raw_password)

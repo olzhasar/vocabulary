@@ -14,9 +14,7 @@ class TestUser:
 
     @pytest.mark.asyncio
     async def test_create(self, use_db):
-        await User.create(
-            id=1, email="info@example.com", password_hash="123qweasd"
-        )
+        await User.create(id=1, email="info@example.com")
 
         assert await User.get(1)
 
@@ -26,3 +24,15 @@ class TestUser:
 
         assert user_from_db.id == 1
         assert user_from_db.email == "info@example.com"
+
+    @pytest.mark.asyncio
+    async def test_password_set_check(self, use_db):
+        user = await User.create(id=1, email="info@example.com")
+
+        assert not user.password_hash
+
+        user.set_password("123qweasd")
+        assert user.password_hash
+
+        assert user.check_password("123qweasd")
+        assert not user.check_password("WrongPassword")
