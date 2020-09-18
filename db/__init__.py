@@ -1,4 +1,4 @@
-from gino.ext.starlette import Gino
+from gino_starlette import Gino
 
 from config.settings import DB_DSN, settings
 
