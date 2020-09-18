@@ -8,7 +8,9 @@ class User(db.Model):
 
     id = db.Column(db.BigInteger(), primary_key=True)
     email = db.Column(db.String(255), nullable=False, unique=True, index=True)
-    password_hash = db.Column(db.String(100), nullable=False)
+    password_hash = db.Column(db.String(100))
+
+    email_verified = db.Column(db.Boolean, default=False)
 
     @staticmethod
     def hash_password(password: str) -> str:
