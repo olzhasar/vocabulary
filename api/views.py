@@ -1,11 +1,24 @@
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, Depends, FastAPI, HTTPException
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
+from db.models import User
+
+from .utils import generate_access_token
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 router = APIRouter()
 
 
 @router.get("/token")
-async def login():
-    pass
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = User.authenticate(**form_data)
+    if not user:
+        raise HTTPException(401, "Invalid login credentials")
+
+    access_token = generate_access_token({"email": user.email})
+
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.get("/signup")
