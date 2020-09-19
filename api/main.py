@@ -9,10 +9,7 @@ from . import views
 logger = logging.getLogger(__name__)
 
 
-def get_app():
-    app = FastAPI(title="Vocabulary")
+app = FastAPI(title="Vocabulary")
 
-    db.init_app(app)
-    views.init_app(app)
-
-    return app
+db.init_app(app)
+views.init_app(app)
