@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from db.models import User
 
+from .schema import SignupSchema, UserInSchema, UserOutSchema
 from .utils import generate_access_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
@@ -23,9 +24,11 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.get("/signup")
-async def signup():
-    pass
+@router.post("/signup", response_model=UserOutSchema, status_code=201)
+async def signup(data: SignupSchema):
+    params = UserInSchema(**data.dict())
+    user = await User.register(**params.dict())
+    return user.__values__
 
 
 @router.get("/words")
