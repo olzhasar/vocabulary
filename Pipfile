@@ -21,6 +21,7 @@ pydantic = {extras = ["dotenv", "email"], version = "*"}
 pytest-asyncio = "*"
 python-multipart = "*"
 gino = {extras = ["starlette"], version = "*"}
+python-jose = {extras = ["cryptography"], version = "*"}
 
 [requires]
 python_version = "3.8"
