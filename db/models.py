@@ -42,4 +42,7 @@ class User(db.Model):
         if not user:
             return False
 
-        return user.check_password(password)
+        if not user.check_password(password):
+            return False
+
+        return user

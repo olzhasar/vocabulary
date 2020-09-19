@@ -52,6 +52,9 @@ class TestUser:
     async def test_authenticate(self, use_db):
         await User.register(email="info@example.com", password="123qweasd")
 
-        assert await User.authenticate("info@example.com", "123qweasd")
         assert not await User.authenticate("info@example.com", "WrongPassword")
         assert not await User.authenticate("wrong@email.com", "123qweasd")
+        user = await User.authenticate("info@example.com", "123qweasd")
+
+        assert user
+        assert user.email == "info@example.com"
