@@ -2,6 +2,8 @@ import pytest
 
 from db.models import User
 
+from .factories import UserFactory
+
 
 class TestUser:
     @pytest.mark.parametrize(
@@ -49,8 +51,23 @@ class TestUser:
         assert not user2.check_password("random string")
 
     @pytest.mark.asyncio
+    async def test_user_factory(self, use_db):
+        user = await UserFactory(
+            email="info@example.com", password="StrongPassword"
+        )
+        assert user
+        assert isinstance(user, User)
+
+        user_from_db = await User.query.where(
+            User.email == "info@example.com"
+        ).gino.first()
+
+        assert user_from_db.email == "info@example.com"
+        assert user_from_db.check_password("StrongPassword")
+
+    @pytest.mark.asyncio
     async def test_authenticate(self, use_db):
-        await User.register(email="info@example.com", password="123qweasd")
+        await UserFactory(email="info@example.com", password="123qweasd")
 
         assert not await User.authenticate("info@example.com", "WrongPassword")
         assert not await User.authenticate("wrong@email.com", "123qweasd")
