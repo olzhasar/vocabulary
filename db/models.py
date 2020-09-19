@@ -1,3 +1,5 @@
+from typing import Optional
+
 import bcrypt
 
 from db import db
@@ -19,9 +21,25 @@ class User(db.Model):
         return hashed.decode("utf-8")
 
     def check_password(self, password: str) -> bool:
-        return bcrypt.checkpw(
-            password.encode("utf-8"), self.password_hash.encode("utf-8")
+        if self.password_hash:
+            return bcrypt.checkpw(
+                password.encode("utf-8"), self.password_hash.encode("utf-8")
+            )
+        return False
+
+    @classmethod
+    async def register(
+        cls, email: str, password: Optional[str] = None, **kwargs
+    ):
+        password_hash = cls.hash_password(password) if password else None
+        return await cls.create(
+            email=email, password_hash=password_hash, **kwargs
         )
 
-    def set_password(self, raw_password):
-        self.password_hash = self.hash_password(raw_password)
+    @classmethod
+    async def authenticate(cls, email: str, password: str):
+        user = await cls.query.where(cls.email == email).gino.first()
+        if not user:
+            return False
+
+        return user.check_password(password)
