@@ -1,4 +1,5 @@
 import pytest
+from httpx import AsyncClient
 
 from config.settings import DB_DSN, settings
 
@@ -16,3 +17,11 @@ async def use_db():
 
     await db.gino.drop_all()
     await db.pop_bind().close()
+
+
+@pytest.fixture
+async def client():
+    from api.main import app
+
+    async with AsyncClient(app=app, base_url="http://localhost:8000") as client:
+        yield client
