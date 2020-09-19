@@ -37,8 +37,8 @@ class User(db.Model):
         )
 
     @classmethod
-    async def authenticate(cls, email: str, password: str):
-        user = await cls.query.where(cls.email == email).gino.first()
+    async def authenticate(cls, username: str, password: str):
+        user = await cls.query.where(cls.email == username).gino.first()
         if not user:
             return False
 
