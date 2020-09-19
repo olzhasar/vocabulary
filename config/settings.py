@@ -9,6 +9,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class Settings(BaseSettings):
     TESTING: bool = False
 
+    SECRET_KEY: str = "VOCABULARY_SECRET"
+    JWT_LIFETIME_MINUTES: int = 60 * 24
+
     DB_DRIVER: str = "postgresql"
     DB_HOST: str = "db"
     DB_PORT: str = "5432"

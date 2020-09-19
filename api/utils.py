@@ -1,7 +1,15 @@
-import bcrypt
+from datetime import datetime, timedelta
+
+from jose import jwt
+
+from config.settings import settings
 
 
-def hash_password(password: str) -> str:
-    salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
-    return hashed.decode("utf-8")
+def generate_access_token(data: dict) -> str:
+    payload = data.copy()
+    expiration = datetime.now() + timedelta(
+        minutes=settings.JWT_LIFETIME_MINUTES
+    )
+
+    payload.update({"exp": expiration})
+    return jwt.encode(payload, settings.SECRET_KEY)
