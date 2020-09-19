@@ -10,9 +10,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 router = APIRouter()
 
 
-@router.get("/token")
+@router.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = User.authenticate(**form_data)
+    user = await User.authenticate(
+        username=form_data.username, password=form_data.password
+    )
     if not user:
         raise HTTPException(401, "Invalid login credentials")
 
