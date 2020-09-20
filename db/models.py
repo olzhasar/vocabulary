@@ -1,6 +1,7 @@
 from typing import Optional
 
 import bcrypt
+from asyncpg.exceptions import UniqueViolationError
 
 from db import db
 
@@ -63,10 +64,14 @@ class Word(db.Model):
     @classmethod
     async def get_or_create(cls, name: str):
         name = name.lower()
-        word = await cls.query.where(cls.name == name).gino.first()
-        if not word:
+        try:
             word = await cls.create(name=name)
-        return word
+        except UniqueViolationError:
+            word = await cls.query.where(cls.name == name).gino.first()
+            created = False
+        else:
+            created = True
+        return word, created
 
 
 class UserWord(db.Model):

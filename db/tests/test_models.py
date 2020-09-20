@@ -90,11 +90,13 @@ class TestUser:
 class TestWord:
     @pytest.mark.asyncio
     async def test_get_or_create(self, use_db):
-        word = await Word.get_or_create(name="Chair")
+        word, created = await Word.get_or_create(name="Chair")
         assert word
+        assert created
 
         word_from_db = await Word.query.where(Word.name == "chair").gino.first()
         assert word_from_db.id == word.id
 
-        word2 = await Word.get_or_create(name="chair")
+        word2, created = await Word.get_or_create(name="chair")
         assert word2.id == word.id
+        assert not created
