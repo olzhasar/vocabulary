@@ -8,7 +8,7 @@ from db import db
 class User(db.Model):
     __tablename__ = "users"
 
-    id = db.Column(db.BigInteger(), primary_key=True)
+    id = db.Column(db.Integer(), primary_key=True)
     email = db.Column(db.String(255), nullable=False, unique=True, index=True)
     password_hash = db.Column(db.String(100))
 
@@ -50,3 +50,23 @@ class User(db.Model):
             return False
 
         return user
+
+
+class Word(db.Model):
+    __tablename__ = "words"
+
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True, index=True)
+
+    description = db.Column(db.JSON())
+
+
+class UserWord(db.Model):
+    __tablename__ = "user_words"
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    word_id = db.Column(db.Integer, db.ForeignKey("words.id"))
+
+    _user_word_idx = db.Index(
+        "index_user_word", "user_id", "word_id", unique=True
+    )
