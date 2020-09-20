@@ -70,20 +70,20 @@ async def word_get(
     return word
 
 
-@router.post("/words/{word}", status_code=status.HTTP_201_CREATED)
+@router.post("/words/{query}", status_code=status.HTTP_201_CREATED)
 async def word_add(
-    word: str,
+    query: str,
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
 ):
-    word, _ = await Word.get_or_create(name=word)
+    word, _ = await Word.get_or_create(name=query)
     try:
         await UserWord.create(user_id=current_user.id, word_id=word.id)
     except UniqueViolationError:
         raise HTTPException(status.HTTP_409_CONFLICT, "Word already exists")
 
     if not word.description:
-        word.description = await WordsAPIClient.query_word(word)
+        word.description = await WordsAPIClient.query_word(query)
         background_tasks.add_task(
             word.update(description=word.description).apply
         )
