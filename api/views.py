@@ -13,7 +13,13 @@ from db.models import User, UserWord, Word
 from words_api.client import WordsAPIClient
 
 from .auth import generate_access_token, get_current_user
-from .schema import SignupSchema, UserInSchema, UserOutSchema
+from .schema import (
+    SignupSchema,
+    UserInSchema,
+    UserOutSchema,
+    WordListSchema,
+    WordSchema,
+)
 
 router = APIRouter()
 
@@ -45,14 +51,23 @@ async def signup(data: SignupSchema):
     return user.__values__
 
 
-@router.get("/words")
+@router.get("/words", response_model=WordListSchema)
 async def word_list(current_user: User = Depends(get_current_user)):
-    return "Not implemented"
+    words = await (
+        UserWord.load(word=Word)
+        .query.where(UserWord.user_id == current_user.id)
+        .gino.all()
+    )
+    words = [item.word.__values__ for item in words]
+    return {"words": words}
 
 
-@router.get("/words/{word}")
-async def word_get(word: str, current_user: User = Depends(get_current_user)):
-    return "Not implemented"
+@router.get("/words/{word_id}", response_model=WordSchema)
+async def word_get(
+    word_id: int, current_user: User = Depends(get_current_user)
+):
+    word = await Word.get(word_id)
+    return word
 
 
 @router.post("/words/{word}", status_code=status.HTTP_201_CREATED)

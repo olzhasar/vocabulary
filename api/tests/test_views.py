@@ -78,6 +78,11 @@ async def test_word_list_unauthenticated(client, use_db):
 @pytest.mark.asyncio
 async def test_word_list_ok(client, use_db):
     user = await UserFactory(email="vincent@vega.com")
+    words = ["banana", "peach", "watermelon"]
+    for name in words:
+        word = await Word.create(name=name)
+        await UserWord.create(user_id=user.id, word_id=word.id)
+
     token = generate_access_token(user.email)
     headers = {"Authorization": f"Bearer {token}"}
 

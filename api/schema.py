@@ -1,3 +1,5 @@
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, EmailStr, constr, validator
 
 
@@ -22,3 +24,12 @@ class SignupSchema(UserInSchema):
         if "password" in values and v != values["password"]:
             raise ValueError("passwords do not match")
         return v
+
+
+class WordSchema(BaseModel):
+    name: str
+    description: Optional[Dict[str, Any]] = {}
+
+
+class WordListSchema(BaseModel):
+    words: List[WordSchema] = []
