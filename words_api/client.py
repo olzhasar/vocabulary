@@ -3,7 +3,7 @@ import asyncio
 import aiohttp
 from fastapi import HTTPException
 
-from settings import settings
+from config.settings import settings
 
 
 class WordsAPIClient:
