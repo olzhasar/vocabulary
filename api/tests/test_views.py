@@ -1,5 +1,6 @@
 import pytest
 
+from api.auth import generate_access_token
 from db.models import User
 from db.tests.factories import UserFactory
 
@@ -13,6 +14,10 @@ async def test_login(client, use_db):
     )
 
     assert response.status_code == 200
+
+    response_json = response.json()
+    assert "access_token" in response_json
+    assert "token_type" in response_json
 
 
 @pytest.mark.asyncio
@@ -62,3 +67,19 @@ async def test_signup_email_in_use(client, use_db):
     )
 
     assert response.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_word_list_unauthenticated(client, use_db):
+    response = await client.get("/words")
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_word_list_ok(client, use_db):
+    user = await UserFactory(email="vincent@vega.com")
+    token = generate_access_token(user.email)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = await client.get("/words", headers=headers)
+    assert response.status_code == 200
