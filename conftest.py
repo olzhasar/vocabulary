@@ -1,14 +1,17 @@
 import pytest
 from httpx import AsyncClient
 
-from config.settings import DB_DSN, settings
+from config.settings import settings
 
 settings.TESTING = True
 
 
 @pytest.fixture
 async def use_db():
+    from config.settings import get_db_dsn
     from db import db
+
+    DB_DSN = get_db_dsn(testing=True)
 
     await db.set_bind(DB_DSN)
     await db.gino.create_all()

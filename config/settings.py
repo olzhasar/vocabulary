@@ -33,14 +33,19 @@ class Settings(BaseSettings):
 
 settings = Settings(_env_file=os.path.join(BASE_DIR, ".env"))
 
-DB_DATABASE = (
-    settings.DB_TEST_DATABASE if settings.TESTING else settings.DB_DATABASE
-)
-DB_DSN = URL(
-    drivername=settings.DB_DRIVER,
-    username=settings.DB_USER,
-    password=settings.DB_PASSWORD,
-    host=settings.DB_HOST,
-    port=settings.DB_PORT,
-    database=DB_DATABASE,
-)
+
+def get_db_dsn(testing=False):
+    DB_DATABASE = (
+        settings.DB_TEST_DATABASE if settings.TESTING else settings.DB_DATABASE
+    )
+    return URL(
+        drivername=settings.DB_DRIVER,
+        username=settings.DB_USER,
+        password=settings.DB_PASSWORD,
+        host=settings.DB_HOST,
+        port=settings.DB_PORT,
+        database=DB_DATABASE,
+    )
+
+
+DB_DSN = get_db_dsn()
