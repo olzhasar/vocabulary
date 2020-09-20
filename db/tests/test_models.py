@@ -36,6 +36,16 @@ class TestUser:
         assert user_from_db.check_password("123qweasd")
 
     @pytest.mark.asyncio
+    async def test_get_by_email(self, use_db):
+        email = "info@example.com"
+
+        user = await User.register(email=email)
+
+        user_from_db = await User.get_by_email(email)
+        assert user_from_db.id == user.id
+        assert user_from_db.email == email
+
+    @pytest.mark.asyncio
     async def test_check_password(self, use_db):
         user = await User.register(email="info@example.com")
 

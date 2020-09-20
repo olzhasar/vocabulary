@@ -28,6 +28,10 @@ class User(db.Model):
         return False
 
     @classmethod
+    async def get_by_email(cls, email: str):
+        return await cls.query.where(cls.email == email).gino.first()
+
+    @classmethod
     async def register(
         cls, email: str, password: Optional[str] = None, **kwargs
     ):
