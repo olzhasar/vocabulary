@@ -1,9 +1,12 @@
 import asyncio
+import logging
 
 import aiohttp
 from fastapi import HTTPException
 
 from config.settings import settings
+
+logger = logging.getLogger(f"vocabulary_{__name__}")
 
 
 class WordsAPIClient:
@@ -35,6 +38,7 @@ class WordsAPIClient:
         try:
             async with session.get(url, headers=cls.headers) as response:
                 if response.status != 200:
+                    logging.error(response.text)
                     raise HTTPException(404, "Word not found")
 
                 json_result = await response.json()
