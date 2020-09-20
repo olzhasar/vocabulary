@@ -16,6 +16,18 @@ async def test_login(client, use_db):
 
 
 @pytest.mark.asyncio
+async def test_bad_login(client, use_db):
+    await UserFactory(email="vincent@vega.com", password="pulpfiction")
+
+    response = await client.post(
+        "/token",
+        data=dict(username="vincent@vega.com", password="wrongpassword"),
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
 async def test_signup(client, use_db):
     response = await client.post(
         "/signup",

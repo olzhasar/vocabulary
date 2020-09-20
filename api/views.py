@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, FastAPI, HTTPException
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from db.models import User
@@ -17,7 +17,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         username=form_data.username, password=form_data.password
     )
     if not user:
-        raise HTTPException(401, "Invalid login credentials")
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid login credentials"
+        )
 
     access_token = generate_access_token({"email": user.email})
 
@@ -30,7 +32,7 @@ async def signup(data: SignupSchema):
 
     existing = await User.get_by_email(params.email)
     if existing:
-        raise HTTPException(409, "Email already taken")
+        raise HTTPException(status.HTTP_409_CONFLICT, "Email already taken")
 
     user = await User.register(**params.dict())
     return user.__values__
