@@ -27,6 +27,11 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 @router.post("/signup", response_model=UserOutSchema, status_code=201)
 async def signup(data: SignupSchema):
     params = UserInSchema(**data.dict())
+
+    existing = await User.get_by_email(params.email)
+    if existing:
+        raise HTTPException(409, "Email already taken")
+
     user = await User.register(**params.dict())
     return user.__values__
 

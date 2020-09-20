@@ -34,3 +34,19 @@ async def test_signup(client, use_db):
 
     assert user_from_db
     assert user_from_db.check_password("pulpfiction")
+
+
+@pytest.mark.asyncio
+async def test_signup_email_in_use(client, use_db):
+    await UserFactory(email="vincent@vega.com")
+
+    response = await client.post(
+        "/signup",
+        json=dict(
+            email="vincent@vega.com",
+            password="pulpfiction",
+            repeat_password="pulpfiction",
+        ),
+    )
+
+    assert response.status_code == 409
