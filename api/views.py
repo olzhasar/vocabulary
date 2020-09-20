@@ -1,12 +1,10 @@
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm
 
 from db.models import User
 
+from .auth import generate_access_token
 from .schema import SignupSchema, UserInSchema, UserOutSchema
-from .utils import generate_access_token
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 router = APIRouter()
 
@@ -21,7 +19,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid login credentials"
         )
 
-    access_token = generate_access_token({"email": user.email})
+    access_token = generate_access_token(email=user.email)
 
     return {"access_token": access_token, "token_type": "bearer"}
 
