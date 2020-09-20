@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from db.models import User
 
-from .auth import generate_access_token
+from .auth import generate_access_token, get_current_user
 from .schema import SignupSchema, UserInSchema, UserOutSchema
 
 router = APIRouter()
@@ -37,22 +37,24 @@ async def signup(data: SignupSchema):
 
 
 @router.get("/words")
-async def word_list():
+async def word_list(current_user: User = Depends(get_current_user)):
     return "Not implemented"
 
 
 @router.get("/words/{word}")
-async def word_get(word: str):
+async def word_get(word: str, current_user: User = Depends(get_current_user)):
     return "Not implemented"
 
 
 @router.post("/words")
-async def word_add():
+async def word_add(current_user: User = Depends(get_current_user)):
     return "Not implemented"
 
 
 @router.delete("/words/{word}")
-async def word_remove(word: str):
+async def word_remove(
+    word: str, current_user: User = Depends(get_current_user)
+):
     return "Not implemented"
 
 
