@@ -1,7 +1,16 @@
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, status
+from asyncpg.exceptions import UniqueViolationError
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    FastAPI,
+    HTTPException,
+    status,
+)
 from fastapi.security import OAuth2PasswordRequestForm
 
-from db.models import User
+from db.models import User, UserWord, Word
+from words_api.client import WordsAPIClient
 
 from .auth import generate_access_token, get_current_user
 from .schema import SignupSchema, UserInSchema, UserOutSchema
@@ -46,9 +55,25 @@ async def word_get(word: str, current_user: User = Depends(get_current_user)):
     return "Not implemented"
 
 
-@router.post("/words")
-async def word_add(current_user: User = Depends(get_current_user)):
-    return "Not implemented"
+@router.post("/words/{word}", status_code=status.HTTP_201_CREATED)
+async def word_add(
+    word: str,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user),
+):
+    word, _ = await Word.get_or_create(name=word)
+    try:
+        await UserWord.create(user_id=current_user.id, word_id=word.id)
+    except UniqueViolationError:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Word already exists")
+
+    if not word.description:
+        word.description = await WordsAPIClient.query_word(word)
+        background_tasks.add_task(
+            word.update(description=word.description).apply
+        )
+
+    return word.description
 
 
 @router.delete("/words/{word}")
