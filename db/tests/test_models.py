@@ -1,6 +1,6 @@
 import pytest
 
-from db.models import User
+from db.models import User, Word
 
 from .factories import UserFactory
 
@@ -85,3 +85,16 @@ class TestUser:
 
         assert user
         assert user.email == "info@example.com"
+
+
+class TestWord:
+    @pytest.mark.asyncio
+    async def test_get_or_create(self, use_db):
+        word = await Word.get_or_create(name="Chair")
+        assert word
+
+        word_from_db = await Word.query.where(Word.name == "chair").gino.first()
+        assert word_from_db.id == word.id
+
+        word2 = await Word.get_or_create(name="chair")
+        assert word2.id == word.id

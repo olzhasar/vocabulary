@@ -60,6 +60,14 @@ class Word(db.Model):
 
     description = db.Column(db.JSON())
 
+    @classmethod
+    async def get_or_create(cls, name: str):
+        name = name.lower()
+        word = await cls.query.where(cls.name == name).gino.first()
+        if not word:
+            word = await cls.create(name=name)
+        return word
+
 
 class UserWord(db.Model):
     __tablename__ = "user_words"
