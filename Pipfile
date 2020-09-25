@@ -11,6 +11,7 @@ pytest = "*"
 pytest-asyncio = "*"
 factory-boy = "*"
 httpx = "*"
+pytest-mock = "*"
 
 [packages]
 fastapi = "*"
