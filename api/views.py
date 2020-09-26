@@ -10,7 +10,11 @@ from fastapi import (
 from fastapi.security import OAuth2PasswordRequestForm
 
 from db.models import User, UserWord, Word
-from words_api.client import WordsAPIClient
+from words_api.client import (
+    WordsAPIClientError,
+    WordsAPIServerError,
+    words_api_client,
+)
 
 from .auth import generate_access_token, get_current_user
 from .schema import (
@@ -70,6 +74,32 @@ async def word_get(
     return word
 
 
+@router.get("/search/{query}")
+async def word_search(
+    query: str,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user),
+):
+    word = await Word.query.where(Word.name == query).gino.first()
+    if word:
+        return word.description
+
+    try:
+        description = await words_api_client.query_word(query)
+    except (WordsAPIServerError, WordsAPIClientError):
+        raise HTTPException(
+            status_code=502,
+            detail="Server error. Try later",
+        )
+
+    if not description:
+        raise HTTPException(status_code=404, detail="Word not found")
+
+    background_tasks.add_task(Word.create, name=query, description=description)
+
+    return description
+
+
 @router.post("/words/{query}", status_code=status.HTTP_201_CREATED)
 async def word_add(
     query: str,
@@ -83,7 +113,7 @@ async def word_add(
         raise HTTPException(status.HTTP_409_CONFLICT, "Word already exists")
 
     if not word.description:
-        word.description = await WordsAPIClient.query_word(query)
+        word.description = await words_api_client.query_word(query)
         background_tasks.add_task(
             word.update(description=word.description).apply
         )

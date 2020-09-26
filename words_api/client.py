@@ -1,16 +1,22 @@
-import asyncio
 import logging
 
 import aiohttp
-from fastapi import HTTPException
+from fastapi import FastAPI
 
 from config.settings import settings
 
 logger = logging.getLogger(f"vocabulary_{__name__}")
 
 
+class WordsAPIClientError(Exception):
+    pass
+
+
+class WordsAPIServerError(Exception):
+    pass
+
+
 class WordsAPIClient:
-    sem: asyncio.Semaphore = None
     session: aiohttp.ClientSession = None
     base_url = "https://wordsapiv1.p.rapidapi.com"
     headers = {
@@ -18,31 +24,50 @@ class WordsAPIClient:
         "x-rapidapi-key": settings.WORDS_API_KEY,
     }
 
-    @classmethod
-    def get_session(cls) -> aiohttp.ClientSession:
-        if cls.session is None:
-            cls.session = aiohttp.ClientSession()
-        return cls.session
+    def setup_session(self):
+        self.session = aiohttp.ClientSession()
 
-    @classmethod
-    async def close_session(cls):
-        if cls.session:
-            await cls.session.close()
-            cls.session = None
+    async def close_session(self):
+        if self.session:
+            await self.session.close()
+        self.session = None
 
-    @classmethod
-    async def query_word(cls, word: str):
-        session = cls.get_session()
-        url = f"{cls.base_url}/words/{word}"
+    def init_app(self, app: FastAPI):
+        if settings.TESTING:
+            self.setup_session()
+
+        @app.on_event("startup")
+        def startup():
+            self.setup_session()
+
+        @app.on_event("shutdown")
+        async def shutdown():
+            await self.close_session()
+
+    async def query_word(self, word: str):
+        url = f"{self.base_url}/words/{word}"
 
         try:
-            async with session.get(url, headers=cls.headers) as response:
-                if response.status != 200:
-                    logging.error(response.text)
-                    raise HTTPException(404, "Word not found")
+            async with self.session.get(url, headers=self.headers) as response:
+                if response.status == 200:
+                    json_result = await response.json()
+                    return json_result
+                elif response.status == 404:
+                    return None
+                logging.error(
+                    response.text,
+                    extra={"status": response.status, "word": word},
+                )
+                raise WordsAPIServerError(response.text)
 
-                json_result = await response.json()
+        except WordsAPIServerError:
+            raise
         except Exception as e:
-            return {"ERROR": e}
+            logging.error(
+                e,
+                extra={"url": url, "word": word},
+            )
+            raise WordsAPIClientError(e)
 
-        return json_result
+
+words_api_client = WordsAPIClient()

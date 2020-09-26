@@ -92,11 +92,14 @@ async def test_word_list_ok(client, use_db):
 
 class TestWordAdd:
     @pytest.fixture
-    def mock_words_api_query_word(self, monkeypatch):
+    def mock_words_api_query_word(self, mocker):
         async def _query_word(word: str):
             return "Test"
 
-        monkeypatch.setattr("api.views.WordsAPIClient.query_word", _query_word)
+        mock = mocker.patch(
+            "api.views.words_api_client.query_word", _query_word
+        )
+        return mock
 
     @pytest.fixture
     @pytest.mark.asyncio
