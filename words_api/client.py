@@ -35,6 +35,7 @@ class WordsAPIClient:
     def init_app(self, app: FastAPI):
         if settings.TESTING:
             self.setup_session()
+            return
 
         @app.on_event("startup")
         def startup():
