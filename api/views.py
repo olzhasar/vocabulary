@@ -93,7 +93,9 @@ async def word_search(
         )
 
     if not description:
-        raise HTTPException(status_code=404, detail="Word not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Word not found"
+        )
 
     background_tasks.add_task(Word.create, name=query, description=description)
 
@@ -106,19 +108,17 @@ async def word_add(
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
 ):
+    word = await Word.query.where(Word.name == query).gino.first()
+    if not word:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Word not found"
+        )
     word, _ = await Word.get_or_create(name=query)
+
     try:
         await UserWord.create(user_id=current_user.id, word_id=word.id)
     except UniqueViolationError:
         raise HTTPException(status.HTTP_409_CONFLICT, "Word already exists")
-
-    if not word.description:
-        word.description = await words_api_client.query_word(query)
-        background_tasks.add_task(
-            word.update(description=word.description).apply
-        )
-
-    return word.description
 
 
 @router.delete("/words/{word}")
