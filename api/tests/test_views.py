@@ -161,6 +161,17 @@ async def test_word_add_non_existing(
 
 
 @pytest.mark.asyncio
+async def test_word_add_duplicate(
+    use_db, client, user, headers, mock_words_api_query_word
+):
+    word = await WordFactory(name="orange")
+    await UserWord.create(word_id=word.id, user_id=user.id)
+
+    response = await client.post(f"/words/{word.id}", headers=headers)
+    assert response.status_code == 409
+
+
+@pytest.mark.asyncio
 async def test_word_delete_ok(use_db, client, user, headers):
     word = await WordFactory(name="orange")
     await UserWord.create(word_id=word.id, user_id=user.id)
