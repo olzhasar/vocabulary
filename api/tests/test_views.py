@@ -158,3 +158,23 @@ async def test_word_add_non_existing(
 ):
     response = await client.post("/words/orange", headers=headers)
     assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_word_delete_ok(use_db, client, user, headers):
+    word = await WordFactory(name="orange")
+    await UserWord.create(word_id=word.id, user_id=user.id)
+
+    response = await client.delete(f"/words/{word.id}", headers=headers)
+    assert response.status_code == 204
+
+    user_word = await UserWord.query.where(
+        and_(UserWord.word_id == word.id, UserWord.user_id == user.id)
+    ).gino.first()
+    assert not user_word
+
+
+@pytest.mark.asyncio
+async def test_word_delete_non_existing(use_db, client, user, headers):
+    response = await client.delete(f"/words/{100}", headers=headers)
+    assert response.status_code == 404
