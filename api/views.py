@@ -1,3 +1,5 @@
+from typing import Any, Dict, Optional
+
 from asyncpg.exceptions import UniqueViolationError
 from fastapi import (
     APIRouter,
@@ -8,6 +10,7 @@ from fastapi import (
     status,
 )
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import and_
 
 from db.models import User, UserWord, Word
 from words_api.client import (
@@ -17,15 +20,21 @@ from words_api.client import (
 )
 
 from .auth import generate_access_token, get_current_user
-from .schema import (
-    SignupSchema,
-    UserInSchema,
-    UserOutSchema,
-    WordListSchema,
-    WordSchema,
-)
+from .schema import SignupSchema, UserInSchema, UserOutSchema, WordListSchema
 
 router = APIRouter()
+
+
+class WordNotFound(HTTPException):
+    def __init__(
+        self,
+        headers: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Word not found",
+            headers=headers,
+        )
 
 
 @router.post("/token")
@@ -52,6 +61,7 @@ async def signup(data: SignupSchema):
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already taken")
 
     user = await User.register(**params.dict())
+
     return user.__values__
 
 
@@ -62,16 +72,10 @@ async def word_list(current_user: User = Depends(get_current_user)):
         .query.where(UserWord.user_id == current_user.id)
         .gino.all()
     )
+
     words = [item.word.__values__ for item in words]
+
     return {"words": words}
-
-
-@router.get("/words/{word_id}", response_model=WordSchema)
-async def word_get(
-    word_id: int, current_user: User = Depends(get_current_user)
-):
-    word = await Word.get(word_id)
-    return word
 
 
 @router.get("/search/{query}")
@@ -88,14 +92,12 @@ async def word_search(
         description = await words_api_client.query_word(query)
     except (WordsAPIServerError, WordsAPIClientError):
         raise HTTPException(
-            status_code=502,
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Server error. Try later",
         )
 
     if not description:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Word not found"
-        )
+        raise WordNotFound
 
     background_tasks.add_task(Word.create, name=query, description=description)
 
@@ -110,9 +112,7 @@ async def word_add(
 ):
     word = await Word.query.where(Word.name == query).gino.first()
     if not word:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Word not found"
-        )
+        raise WordNotFound
     word, _ = await Word.get_or_create(name=query)
 
     try:
@@ -121,11 +121,18 @@ async def word_add(
         raise HTTPException(status.HTTP_409_CONFLICT, "Word already exists")
 
 
-@router.delete("/words/{word}")
+@router.delete("/words/{word}", status_code=status.HTTP_204_NO_CONTENT)
 async def word_remove(
-    word: str, current_user: User = Depends(get_current_user)
+    word_id: int, current_user: User = Depends(get_current_user)
 ):
-    return "Not implemented"
+    user_word = UserWord.query.where(
+        and_(UserWord.word_id == word_id, UserWord.user_id == current_user.id)
+    ).gino.first()
+
+    if not user_word:
+        raise WordNotFound
+
+    await user_word.delete()
 
 
 def init_app(app: FastAPI):
