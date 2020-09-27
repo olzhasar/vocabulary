@@ -6,6 +6,23 @@ from db.models import User, UserWord, Word
 from db.tests.factories import UserFactory, WordFactory
 
 
+@pytest.fixture
+async def user():
+    return await UserFactory(email="vincent@vega.com")
+
+
+@pytest.fixture
+async def headers(user):
+    token = generate_access_token(user.email)
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def mock_words_api_query_word(mocker):
+    mock = mocker.patch("api.views.words_api_client.query_word")
+    return mock
+
+
 @pytest.mark.asyncio
 async def test_login(client, use_db):
     await UserFactory(email="vincent@vega.com", password="pulpfiction")
@@ -77,87 +94,67 @@ async def test_word_list_unauthenticated(client, use_db):
 
 
 @pytest.mark.asyncio
-async def test_word_list_ok(client, use_db):
-    user = await UserFactory(email="vincent@vega.com")
+async def test_word_list_ok(client, use_db, user, headers):
     words = ["banana", "peach", "watermelon"]
     for name in words:
         word = await Word.create(name=name)
         await UserWord.create(user_id=user.id, word_id=word.id)
 
-    token = generate_access_token(user.email)
-    headers = {"Authorization": f"Bearer {token}"}
-
     response = await client.get("/words", headers=headers)
     assert response.status_code == 200
 
 
-@pytest.fixture
-def mock_words_api_query_word(mocker):
-    mock = mocker.patch("api.views.words_api_client.query_word")
-    return mock
+@pytest.mark.asyncio
+async def test_search_unexisting_word(
+    use_db, auth_client, mock_words_api_query_word
+):
+    word = await Word.query.where(Word.name == "test").gino.first()
+    assert not word
+
+    mock_words_api_query_word.return_value = {"description": "test"}
+
+    response = await auth_client.get("/search/test")
+    assert response.status_code == 200
+
+    mock_words_api_query_word.assert_called_once_with("test")
+    assert response.json() == {"description": "test"}
+
+    word = await Word.query.where(Word.name == "test").gino.first()
+    assert word
 
 
-class TestWordSearch:
-    def get_url(self, query: str):
-        return f"/search/{query}"
+@pytest.mark.asyncio
+async def test_search_existing_word(
+    use_db, auth_client, mock_words_api_query_word
+):
+    description = {"description": "test"}
+    await WordFactory(name="fiction", description=description)
 
-    @pytest.mark.asyncio
-    async def test_search_unexisting_word(
-        self, use_db, auth_client, mock_words_api_query_word
-    ):
-        word = await Word.query.where(Word.name == "test").gino.first()
-        assert not word
-        mock_words_api_query_word.return_value = {"description": "test"}
+    response = await auth_client.get("/search/fiction")
+    assert response.status_code == 200
+    assert response.json() == description
 
-        response = await auth_client.get(self.get_url("test"))
-        assert response.status_code == 200
-
-        mock_words_api_query_word.assert_called_once_with("test")
-        assert response.json() == {"description": "test"}
-
-        word = await Word.query.where(Word.name == "test").gino.first()
-        assert word
-
-    @pytest.mark.asyncio
-    async def test_search_existing_word(
-        self, use_db, auth_client, mock_words_api_query_word
-    ):
-        description = {"description": "test"}
-        word = await WordFactory(name="fiction", description=description)
-
-        response = await auth_client.get(self.get_url(word.name))
-        assert response.status_code == 200
-
-        mock_words_api_query_word.assert_not_called()
+    mock_words_api_query_word.assert_not_called()
 
 
-class TestWordAdd:
-    @pytest.fixture
-    async def user(self):
-        return await UserFactory(email="vincent@vega.com")
+@pytest.mark.asyncio
+async def test_word_add_ok(
+    use_db, client, user, headers, mock_words_api_query_word
+):
+    word = await WordFactory(name="orange")
 
-    @pytest.fixture
-    async def headers(self, user):
-        token = generate_access_token(user.email)
-        return {"Authorization": f"Bearer {token}"}
+    response = await client.post("/words/orange", headers=headers)
+    assert response.status_code == 201
 
-    @pytest.mark.asyncio
-    async def test_add_ok(
-        self, use_db, client, user, headers, mock_words_api_query_word
-    ):
-        word = await WordFactory(name="orange")
+    user_word = await UserWord.query.where(
+        and_(UserWord.user_id == user.id, UserWord.word_id == word.id)
+    ).gino.first()
+    assert user_word
 
-        response = await client.post("/words/orange", headers=headers)
-        assert response.status_code == 201
 
-        user_word = await UserWord.query.where(
-            and_(UserWord.user_id == user.id, UserWord.word_id == word.id)
-        ).gino.first()
-        assert user_word
-
-    @pytest.mark.asyncio
-    async def test_add_non_existing(
-        self, use_db, client, user, headers, mock_words_api_query_word
-    ):
-        response = await client.post("/words/orange", headers=headers)
-        assert response.status_code == 404
+@pytest.mark.asyncio
+async def test_word_add_non_existing(
+    use_db, client, user, headers, mock_words_api_query_word
+):
+    response = await client.post("/words/orange", headers=headers)
+    assert response.status_code == 404
