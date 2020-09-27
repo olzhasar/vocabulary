@@ -121,11 +121,11 @@ async def word_add(
         raise HTTPException(status.HTTP_409_CONFLICT, "Word already exists")
 
 
-@router.delete("/words/{word}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/words/{word_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def word_remove(
     word_id: int, current_user: User = Depends(get_current_user)
 ):
-    user_word = UserWord.query.where(
+    user_word = await UserWord.query.where(
         and_(UserWord.word_id == word_id, UserWord.user_id == current_user.id)
     ).gino.first()
 
