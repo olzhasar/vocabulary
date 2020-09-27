@@ -1,7 +1,9 @@
 import pytest
 from httpx import AsyncClient
 
+from api.auth import generate_access_token
 from config.settings import settings
+from db.tests.factories import UserFactory
 
 settings.TESTING = True
 
@@ -27,4 +29,19 @@ async def client():
     from api.main import app
 
     async with AsyncClient(app=app, base_url="http://localhost:8000") as client:
+        yield client
+
+
+@pytest.fixture
+async def auth_client():
+    from api.main import app
+
+    user = await UserFactory()
+
+    token = generate_access_token(user.email)
+    headers = {"Authorization": f"Bearer {token}"}
+
+    async with AsyncClient(
+        app=app, base_url="http://localhost:8000", headers=headers
+    ) as client:
         yield client
