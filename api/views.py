@@ -104,16 +104,15 @@ async def word_search(
     return description
 
 
-@router.post("/words/{query}", status_code=status.HTTP_201_CREATED)
+@router.post("/words/{word_id}", status_code=status.HTTP_201_CREATED)
 async def word_add(
-    query: str,
+    word_id: int,
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
 ):
-    word = await Word.query.where(Word.name == query).gino.first()
+    word = await Word.get(word_id)
     if not word:
         raise WordNotFound
-    word, _ = await Word.get_or_create(name=query)
 
     try:
         await UserWord.create(user_id=current_user.id, word_id=word.id)

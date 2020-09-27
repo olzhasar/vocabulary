@@ -143,7 +143,7 @@ async def test_word_add_ok(
 ):
     word = await WordFactory(name="orange")
 
-    response = await client.post("/words/orange", headers=headers)
+    response = await client.post(f"/words/{word.id}", headers=headers)
     assert response.status_code == 201
 
     user_word = await UserWord.query.where(
@@ -156,7 +156,7 @@ async def test_word_add_ok(
 async def test_word_add_non_existing(
     use_db, client, user, headers, mock_words_api_query_word
 ):
-    response = await client.post("/words/orange", headers=headers)
+    response = await client.post("/words/100", headers=headers)
     assert response.status_code == 404
 
 
