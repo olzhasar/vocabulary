@@ -77,6 +77,7 @@ class Word(db.Model):
 class UserWord(db.Model):
     __tablename__ = "user_words"
 
+    id = db.Column(db.Integer(), primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     word_id = db.Column(db.Integer, db.ForeignKey("words.id"))
 
