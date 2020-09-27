@@ -59,8 +59,6 @@ class Word(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True, index=True)
 
-    description = db.Column(db.JSON())
-
     @classmethod
     async def get_or_create(cls, name: str):
         name = name.lower()
@@ -72,6 +70,16 @@ class Word(db.Model):
         else:
             created = True
         return word, created
+
+
+class WordVariant(db.Model):
+    __tablename__ = "word_variants"
+
+    id = db.Column(db.Integer(), primary_key=True)
+    word_id = db.Column(db.Integer, db.ForeignKey("words.id"))
+
+    part_of_speech = db.Column(db.String(32), nullable=False, index=True)
+    definition = db.Column(db.Text, nullable=False)
 
 
 class UserWord(db.Model):
