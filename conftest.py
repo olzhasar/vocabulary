@@ -15,13 +15,12 @@ async def use_db():
 
     DB_DSN = get_db_dsn()
 
-    await db.set_bind(DB_DSN)
-    await db.gino.create_all()
+    async with db.with_bind(DB_DSN):
+        await db.gino.create_all()
 
-    yield
+        yield
 
-    await db.gino.drop_all()
-    await db.pop_bind().close()
+        await db.gino.drop_all()
 
 
 @pytest.fixture
