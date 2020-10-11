@@ -3,7 +3,7 @@ import string
 
 import factory
 
-from db.models import User, Word
+from db.models import User, Word, WordVariant
 
 
 def get_random_string(instance):
@@ -36,6 +36,13 @@ class WordFactory(factory.Factory):
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
         async def create_async(*args, **kwargs):
-            return await model_class.create(*args, **kwargs)
+            variants = kwargs.pop("variants")
+
+            obj = await model_class.create(*args, **kwargs)
+
+            for variant in variants:
+                await WordVariant.create(word_id=obj.id, **variant)
+
+            return obj
 
         return create_async(*args, **kwargs)
