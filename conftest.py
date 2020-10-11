@@ -13,7 +13,7 @@ async def use_db():
     from config.settings import get_db_dsn
     from db import db
 
-    DB_DSN = get_db_dsn(testing=True)
+    DB_DSN = get_db_dsn()
 
     await db.set_bind(DB_DSN)
     await db.gino.create_all()

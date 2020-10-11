@@ -34,7 +34,7 @@ class Settings(BaseSettings):
 settings = Settings(_env_file=os.path.join(BASE_DIR, ".env"))
 
 
-def get_db_dsn(testing=False):
+def get_db_dsn():
     DB_DATABASE = (
         settings.DB_TEST_DATABASE if settings.TESTING else settings.DB_DATABASE
     )
