@@ -15,7 +15,7 @@ async def use_db():
 
     DB_DSN = get_db_dsn()
 
-    async with db.with_bind(DB_DSN):
+    async with db.with_bind(DB_DSN, echo=True):
         await db.gino.create_all()
 
         yield
