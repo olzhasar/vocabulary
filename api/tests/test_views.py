@@ -111,13 +111,27 @@ async def test_search_unexisting_word(
     word = await Word.query.where(Word.name == "test").gino.first()
     assert not word
 
-    mock_words_api_query_word.return_value = {"description": "test"}
+    mock_words_api_query_word.return_value = {
+        "word": "test",
+        "results": [
+            {"partOfSpeech": "noun", "definition": "test1"},
+            {"partOfSpeech": "adjective", "definition": "test2"},
+        ],
+    }
 
     response = await auth_client.get("/search/test")
     assert response.status_code == 200
 
     mock_words_api_query_word.assert_called_once_with("test")
-    assert response.json() == {"description": "test"}
+
+    data = response.json()
+
+    assert data["name"] == "test"
+
+    assert data["variants"][0]["part_of_speech"] == "noun"
+    assert data["variants"][0]["definition"] == "test1"
+    assert data["variants"][1]["part_of_speech"] == "adjective"
+    assert data["variants"][1]["definition"] == "test2"
 
     word = await Word.query.where(Word.name == "test").gino.first()
     assert word
@@ -127,12 +141,25 @@ async def test_search_unexisting_word(
 async def test_search_existing_word(
     use_db, auth_client, mock_words_api_query_word
 ):
-    description = {"description": "test"}
-    await WordFactory(name="fiction", description=description)
+    await WordFactory(
+        name="fiction",
+        variants=[
+            {"part_of_speech": "noun", "definition": "test1"},
+            {"part_of_speech": "adjective", "definition": "test2"},
+        ],
+    )
 
     response = await auth_client.get("/search/fiction")
     assert response.status_code == 200
-    assert response.json() == description
+
+    data = response.json()
+
+    assert data["name"] == "fiction"
+
+    assert data["variants"][0]["part_of_speech"] == "noun"
+    assert data["variants"][0]["definition"] == "test1"
+    assert data["variants"][1]["part_of_speech"] == "adjective"
+    assert data["variants"][1]["definition"] == "test2"
 
     mock_words_api_query_word.assert_not_called()
 

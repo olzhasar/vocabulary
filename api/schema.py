@@ -1,6 +1,6 @@
-from typing import Any, Dict, List, Optional
+from typing import List
 
-from pydantic import BaseModel, EmailStr, constr, validator
+from pydantic import BaseModel, EmailStr, Field, constr, validator
 
 
 class UserSchema(BaseModel):
@@ -26,9 +26,24 @@ class SignupSchema(UserInSchema):
         return v
 
 
+class WordVariantSchema(BaseModel):
+    part_of_speech: str
+    definition: str
+
+
 class WordSchema(BaseModel):
     name: str
-    description: Optional[Dict[str, Any]] = {}
+    variants: List[WordVariantSchema]
+
+
+class WordVariantAPISchema(BaseModel):
+    part_of_speech: str = Field(alias="partOfSpeech")
+    definition: str
+
+
+class WordAPISchema(BaseModel):
+    name: str = Field(alias="word")
+    variants: List[WordVariantAPISchema] = Field(alias="results")
 
 
 class WordListSchema(BaseModel):

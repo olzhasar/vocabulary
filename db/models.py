@@ -59,6 +59,10 @@ class Word(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True, index=True)
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._variants = []
+
     @classmethod
     async def get_or_create(cls, name: str):
         name = name.lower()
@@ -70,6 +74,14 @@ class Word(db.Model):
         else:
             created = True
         return word, created
+
+    @property
+    def variants(self):
+        return self._variants
+
+    @variants.setter
+    def add_variant(self, variant):
+        self._variants.append(variant)
 
 
 class WordVariant(db.Model):

@@ -12,7 +12,8 @@ from fastapi import (
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import and_
 
-from db.models import User, UserWord, Word
+from db.models import User, UserWord, Word, WordVariant
+from db.services import add_new_word, get_user_words_with_variants
 from words_api.client import (
     WordsAPIClientError,
     WordsAPIServerError,
@@ -20,7 +21,14 @@ from words_api.client import (
 )
 
 from .auth import generate_access_token, get_current_user
-from .schema import SignupSchema, UserInSchema, UserOutSchema, WordListSchema
+from .schema import (
+    SignupSchema,
+    UserInSchema,
+    UserOutSchema,
+    WordAPISchema,
+    WordListSchema,
+    WordSchema,
+)
 
 router = APIRouter()
 
@@ -67,18 +75,16 @@ async def signup(data: SignupSchema):
 
 @router.get("/words", response_model=WordListSchema)
 async def word_list(current_user: User = Depends(get_current_user)):
-    words = await (
-        UserWord.load(word=Word)
-        .query.where(UserWord.user_id == current_user.id)
-        .gino.all()
-    )
+    words = await get_user_words_with_variants(current_user.id)
 
-    words = [item.word.__values__ for item in words]
+    data = []
+    for word in words:
+        data.append(dict(name=word.name, variants=word.variants))
 
-    return {"words": words}
+    return {"words": data}
 
 
-@router.get("/search/{query}")
+@router.get("/search/{query}", response_model=WordSchema)
 async def word_search(
     query: str,
     background_tasks: BackgroundTasks,
@@ -86,22 +92,31 @@ async def word_search(
 ):
     word = await Word.query.where(Word.name == query).gino.first()
     if word:
-        return word.description
+        variants = await WordVariant.query.where(
+            WordVariant.word_id == word.id
+        ).gino.all()
+
+        return {
+            "name": word.name,
+            "variants": [item.__values__ for item in variants],
+        }
 
     try:
-        description = await words_api_client.query_word(query)
+        data = await words_api_client.query_word(query)
     except (WordsAPIServerError, WordsAPIClientError):
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Server error. Try later",
         )
 
-    if not description:
+    if not data:
         raise WordNotFound
 
-    background_tasks.add_task(Word.create, name=query, description=description)
+    cleaned_data = WordAPISchema(**data).dict()
 
-    return description
+    background_tasks.add_task(add_new_word, **cleaned_data)
+
+    return cleaned_data
 
 
 @router.post("/words/{word_id}", status_code=status.HTTP_201_CREATED)
