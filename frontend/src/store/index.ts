@@ -1,11 +1,17 @@
 import Vue from "vue";
-import Vuex from "vuex";
+import Vuex, { StoreOptions } from "vuex";
+import { RootState } from "../types";
+
+import { actions } from "./actions";
 
 Vue.use(Vuex);
 
-export default new Vuex.Store({
-  state: {},
-  mutations: {},
-  actions: {},
-  modules: {}
-});
+const store: StoreOptions<RootState> = {
+  state: {
+    token: localStorage.getItem("token"),
+    words: []
+  },
+  actions: actions
+};
+
+export default new Vuex.Store(store);

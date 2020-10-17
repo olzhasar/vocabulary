@@ -4,24 +4,23 @@
       <v-container fluid fill-height>
         <v-layout align-center justify-center>
           <v-flex xs12 sm8 md4>
-            <v-form ref="form" v-model="valid" lazy-validation>
+            <v-form ref="form">
               <h1>Vocabulary</h1>
 
               <v-text-field
                 v-model="email"
-                :rules="nameRules"
                 label="Email"
                 required
               ></v-text-field>
 
               <v-text-field
                 v-model="password"
-                :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
-                :type="show1 ? 'text' : 'password'"
+                append-icon="mdi-eye"
+                type="password"
                 label="Password"
               ></v-text-field>
 
-              <v-btn color="info" class="mr-4" @click="reset">
+              <v-btn color="info" class="mr-4" @click="login">
                 Login
               </v-btn>
             </v-form>
@@ -33,7 +32,21 @@
 </template>
 
 <script lang="ts">
-export default {
-  data: () => ({})
-};
+import Vue from "vue";
+
+export default Vue.extend({
+  data() {
+    return {
+      email: "",
+      password: ""
+    };
+  },
+  methods: {
+    login: function() {
+      const email = this.email;
+      const password = this.password;
+      this.$store.dispatch("login", { email, password });
+    }
+  }
+});
 </script>
