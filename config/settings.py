@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 from pydantic import BaseSettings
 from sqlalchemy.engine.url import URL
@@ -31,6 +32,11 @@ class Settings(BaseSettings):
     DB_RETRY_INTERVAL: int = 1
 
     WORDS_API_KEY: str
+
+    CORS_ALLOW_ORIGINS: List[str] = [
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+    ]
 
 
 settings = Settings(_env_file=os.path.join(BASE_DIR, ".env"))
