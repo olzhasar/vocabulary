@@ -18,6 +18,7 @@
                 append-icon="mdi-eye"
                 type="password"
                 label="Password"
+                required
               ></v-text-field>
 
               <v-btn color="info" class="mr-4" @click="login">

@@ -4,8 +4,12 @@ import { RootState } from "../types";
 
 export const actions: ActionTree<RootState, any> = {
   login(store, payload) {
+    const formData = new FormData();
+    formData.append("username", payload.email);
+    formData.append("password", payload.password);
+
     apiClient
-      .post("/token", { username: payload.email, password: payload.password })
+      .post("/token", formData)
       .then(response => (store.state.token = response.data.access_token));
   }
 };
