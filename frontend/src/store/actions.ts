@@ -8,8 +8,20 @@ export const actions: ActionTree<RootState, any> = {
     formData.append("username", payload.email);
     formData.append("password", payload.password);
 
+    apiClient.post("/token", formData).then(response => {
+      const token = response.data.access_token;
+      localStorage.setItem("token", token);
+      apiClient.defaults.headers.common["Authorization"] = token + " Bearer";
+      store.state.token = response.data.access_token;
+    });
+  },
+  signup(store, payload) {
     apiClient
-      .post("/token", formData)
+      .post("/signup", {
+        username: payload.username,
+        password: payload.password,
+        repeatPassword: payload.repeatPassword
+      })
       .then(response => (store.state.token = response.data.access_token));
   }
 };
