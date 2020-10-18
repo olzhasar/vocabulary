@@ -11,7 +11,10 @@ const store: StoreOptions<RootState> = {
     token: localStorage.getItem("token"),
     words: []
   },
-  actions: actions
+  actions: actions,
+  getters: {
+    isLoggedIn: state => !!state.token
+  }
 };
 
 export default new Vuex.Store(store);
