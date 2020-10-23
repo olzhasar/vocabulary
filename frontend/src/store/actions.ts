@@ -14,18 +14,24 @@ export const actions: ActionTree<RootState, any> = {
       .then(response => {
         const token = response.data.access_token;
 
+        apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
         localStorage.setItem("token", token);
-        apiClient.defaults.headers.common["Authorization"] = token + " Bearer";
-        store.state.token = response.data.access_token;
+        store.commit("setToken", { token: token });
 
         router.push("/");
       })
       .catch(err => {
+        let msg: string;
+
         if (err.response && err.response.status === 422) {
-          store.state.authError = "Invalid credentials";
+          msg = "Invalid credentials";
         } else {
-          store.state.authError = "Server error. Please, try later";
+          msg = "Server error. Please, try later";
         }
+
+        localStorage.removeItem("token");
+        store.commit("authError", { msg: msg });
       });
   },
 
@@ -37,5 +43,13 @@ export const actions: ActionTree<RootState, any> = {
         repeatPassword: payload.repeatPassword
       })
       .then(response => (store.state.token = response.data.access_token));
+  },
+
+  getWords(store) {
+    apiClient.get("/words").then(response => {
+      const words = response.data.words;
+
+      store.commit("setWords", { words: words });
+    });
   }
 };

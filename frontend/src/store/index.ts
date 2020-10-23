@@ -3,6 +3,7 @@ import Vuex, { StoreOptions } from "vuex";
 import { RootState } from "../types";
 
 import { actions } from "./actions";
+import { mutations } from "./mutations";
 
 Vue.use(Vuex);
 
@@ -13,6 +14,7 @@ const store: StoreOptions<RootState> = {
     words: []
   },
   actions: actions,
+  mutations: mutations,
   getters: {
     isLoggedIn: state => !!state.token
   }
