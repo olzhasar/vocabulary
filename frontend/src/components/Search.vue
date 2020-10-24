@@ -1,15 +1,11 @@
 <template>
   <div class="search">
-    <v-card elevation="2" class="mb-3">
-      <v-card-text>
-        <v-form @submit.prevent="searchWord" ref="form">
-          <v-text-field v-model="word" label="Word" required></v-text-field>
-          <v-btn color="info" class="mr-4" type="submit">
-            Search
-          </v-btn>
-        </v-form>
-      </v-card-text>
-    </v-card>
+    <v-form @submit.prevent="searchWord" ref="form" class="mb-6">
+      <v-text-field v-model="word" label="Word" required></v-text-field>
+      <v-btn color="info" class="mr-4" type="submit">
+        Search
+      </v-btn>
+    </v-form>
     <v-card elevation="2" v-if="variants.length">
       <v-card-title>
         Results
