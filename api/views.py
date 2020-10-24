@@ -13,7 +13,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import and_
 
 from db.models import User, UserWord, Word, WordVariant
-from db.services import add_new_word, get_user_words_with_variants
+from db.queries import add_new_word, get_user_words_with_variants
 from words_api.client import (
     WordsAPIClientError,
     WordsAPIServerError,

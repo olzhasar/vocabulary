@@ -1,7 +1,7 @@
 import pytest
 
 from db.models import UserWord, Word, WordVariant
-from db.services import add_new_word, get_user_words_with_variants
+from db.queries import add_new_word, get_user_words_with_variants
 from db.tests.factories import UserFactory, WordFactory
 
 
