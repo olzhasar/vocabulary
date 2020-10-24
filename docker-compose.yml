@@ -14,7 +14,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  web:
+  uvicorn:
     build: .
     command: bash -c 'alembic upgrade head && uvicorn --host 0.0.0.0 --port 8000 --reload main:app'
     volumes:
@@ -24,3 +24,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  nginx:
+    build: frontend/
+    command: nginx -g "daemon off;"
+    ports:
+      - "8989:80"
