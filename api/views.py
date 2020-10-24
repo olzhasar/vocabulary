@@ -84,16 +84,16 @@ async def word_list(current_user: User = Depends(get_current_user)):
     return {"words": data}
 
 
-@router.get("/search/{query}", response_model=WordSchema)
+@router.get("/search/{name}", response_model=WordSchema)
 async def word_search(
-    query: str,
+    name: str,
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
 ):
-    word = await queries.get_word_with_variants_by_name(query)
+    word = await queries.get_word_with_variants_by_name(name)
     if not word:
         try:
-            data = await words_api_client.query_word(query)
+            data = await words_api_client.query_word(name)
         except (WordsAPIServerError, WordsAPIClientError):
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
