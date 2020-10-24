@@ -19,6 +19,8 @@ apiClient.interceptors.response.use(
   function(error) {
     if (error.response.status === 401) {
       router.push("/login");
+    } else {
+      throw error;
     }
   }
 );
