@@ -79,7 +79,7 @@ async def word_list(current_user: User = Depends(get_current_user)):
 
     data = []
     for word in words:
-        data.append(dict(name=word.name, variants=word.variants))
+        data.append(WordSchema.from_orm(word))
 
     return {"words": data}
 
@@ -91,28 +91,23 @@ async def word_search(
     current_user: User = Depends(get_current_user),
 ):
     word = await queries.get_word_with_variants_by_name(query)
-    if word:
-        return {
-            "name": word.name,
-            "variants": [item.__values__ for item in word.variants],
-        }
+    if not word:
+        try:
+            data = await words_api_client.query_word(query)
+        except (WordsAPIServerError, WordsAPIClientError):
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Server error. Try later",
+            )
 
-    try:
-        data = await words_api_client.query_word(query)
-    except (WordsAPIServerError, WordsAPIClientError):
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Server error. Try later",
-        )
+        if not data:
+            raise WordNotFound
 
-    if not data:
-        raise WordNotFound
+        cleaned_data = WordAPISchema(**data).dict()
 
-    cleaned_data = WordAPISchema(**data).dict()
+        word = await queries.add_new_word(**cleaned_data)
 
-    background_tasks.add_task(queries.add_new_word, **cleaned_data)
-
-    return cleaned_data
+    return WordSchema.from_orm(word)
 
 
 @router.post("/words/{word_id}", status_code=status.HTTP_201_CREATED)

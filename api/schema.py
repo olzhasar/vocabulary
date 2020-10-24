@@ -30,10 +30,17 @@ class WordVariantSchema(BaseModel):
     part_of_speech: str
     definition: str
 
+    class Config:
+        orm_mode = True
+
 
 class WordSchema(BaseModel):
+    id: int
     name: str
     variants: List[WordVariantSchema]
+
+    class Config:
+        orm_mode = True
 
 
 class WordVariantAPISchema(BaseModel):
