@@ -76,7 +76,7 @@ export default Vue.extend({
         });
     },
     saveWord: function() {
-      apiClient.post(`/words/${this.word.id}`).then(response => {
+      apiClient.post(`/words/${this.word.id}`).then(() => {
         this.$store.state.words.push(this.word);
         this.alreadySaved = true;
       });
