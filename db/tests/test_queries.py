@@ -3,6 +3,7 @@ import pytest
 from db.models import UserWord, Word, WordVariant
 from db.queries import (
     add_new_word,
+    get_user_word,
     get_user_words_with_variants,
     get_word_with_variants_by_name,
 )
@@ -88,3 +89,15 @@ async def test_get_word_with_variants_by_name(use_db):
     unexisting = await get_word_with_variants_by_name("unexisting")
 
     assert unexisting is None
+
+
+@pytest.mark.asyncio
+async def test_get_user_word(use_db):
+    user = await UserFactory()
+    word = await WordFactory(name="banana")
+    await UserWord.create(user_id=user.id, word_id=word.id)
+
+    word_from_db = await get_user_word(word.id, user.id)
+
+    assert word_from_db.word_id == word.id
+    assert word_from_db.user_id == user.id

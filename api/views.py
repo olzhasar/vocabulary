@@ -10,7 +10,6 @@ from fastapi import (
     status,
 )
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy import and_
 
 from db import queries
 from db.models import User, UserWord, Word
@@ -130,9 +129,7 @@ async def word_add(
 async def word_remove(
     word_id: int, current_user: User = Depends(get_current_user)
 ):
-    user_word = await UserWord.query.where(
-        and_(UserWord.word_id == word_id, UserWord.user_id == current_user.id)
-    ).gino.first()
+    user_word = await queries.get_user_word(word_id, current_user.id)
 
     if not user_word:
         raise WordNotFound
