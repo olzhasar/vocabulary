@@ -7,11 +7,11 @@
       </v-btn>
     </v-form>
     <p v-if="notFound">No results found</p>
-    <v-card elevation="2" v-if="variants.length">
+    <v-card elevation="2" v-if="word.variants.length" class="mb-6">
       <v-card-title>
         Results
       </v-card-title>
-      <v-list-item v-for="variant in variants" :key="variant.id">
+      <v-list-item v-for="variant in word.variants" :key="variant.id">
         <v-list-item-content>
           <v-list-item-title>
             {{ variant.definition }}
@@ -22,11 +22,21 @@
         </v-list-item-content>
       </v-list-item>
       <v-card-actions>
-        <v-btn tile color="info" text v-on:click="saveWord">
+        <v-btn
+          v-if="!alreadySaved"
+          tile
+          color="info"
+          text
+          v-on:click="saveWord"
+        >
           <v-icon left>
             mdi-plus
           </v-icon>
           Save
+        </v-btn>
+
+        <v-btn v-if="alreadySaved" tile disabled text>
+          Saved
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -37,12 +47,15 @@
 import Vue from "vue";
 import apiClient from "../api_client";
 
+const blankWord = { name: null, id: null, variants: [] };
+
 export default Vue.extend({
   name: "Search",
   data: () => ({
-    word: { name: null, id: null },
+    word: blankWord,
     variants: [],
-    notFound: false
+    notFound: false,
+    alreadySaved: false
   }),
   methods: {
     searchWord: function() {
@@ -51,28 +64,37 @@ export default Vue.extend({
           validateStatus: status => status === 200
         })
         .then(response => {
-          this.variants = response.data.variants;
-          this.word.id = response.data.id;
+          this.word = response.data;
           this.notFound = false;
+          this.checkAlreadySaved();
         })
         .catch(err => {
-          console.error(err);
-          console.error(err.response.data);
-          console.error(err.response.status);
-          console.error(err.response.headers);
-
           if (err.response && err.response.status === 404) {
-            this.variants = [];
-            this.word.id = null;
+            this.word = blankWord;
             this.notFound = true;
           }
         });
     },
     saveWord: function() {
-      apiClient.post(`/words/${this.word.id}`);
+      apiClient.post(`/words/${this.word.id}`).then(response => {
+        this.$store.state.words.push(this.word);
+        this.alreadySaved = true;
+      });
     },
     deleteWord: function(wordId: number) {
       apiClient.delete(`/words/${wordId}`);
+    },
+    checkAlreadySaved: function() {
+      let i;
+
+      for (i = 0; i < this.$store.state.words.length; i++) {
+        if (this.$store.state.words[i].id === this.word.id) {
+          this.alreadySaved = true;
+          return;
+        }
+      }
+
+      this.alreadySaved = false;
     }
   }
 });
