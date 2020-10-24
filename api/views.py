@@ -12,8 +12,8 @@ from fastapi import (
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import and_
 
-from db.models import User, UserWord, Word, WordVariant
-from db.queries import add_new_word, get_user_words_with_variants
+from db import queries
+from db.models import User, UserWord, Word
 from words_api.client import (
     WordsAPIClientError,
     WordsAPIServerError,
@@ -75,7 +75,7 @@ async def signup(data: SignupSchema):
 
 @router.get("/words", response_model=WordListSchema)
 async def word_list(current_user: User = Depends(get_current_user)):
-    words = await get_user_words_with_variants(current_user.id)
+    words = await queries.get_user_words_with_variants(current_user.id)
 
     data = []
     for word in words:
@@ -90,15 +90,11 @@ async def word_search(
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
 ):
-    word = await Word.query.where(Word.name == query).gino.first()
+    word = await queries.get_word_with_variants_by_name(query)
     if word:
-        variants = await WordVariant.query.where(
-            WordVariant.word_id == word.id
-        ).gino.all()
-
         return {
             "name": word.name,
-            "variants": [item.__values__ for item in variants],
+            "variants": [item.__values__ for item in word.variants],
         }
 
     try:
@@ -114,7 +110,7 @@ async def word_search(
 
     cleaned_data = WordAPISchema(**data).dict()
 
-    background_tasks.add_task(add_new_word, **cleaned_data)
+    background_tasks.add_task(queries.add_new_word, **cleaned_data)
 
     return cleaned_data
 

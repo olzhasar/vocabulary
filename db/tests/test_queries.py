@@ -1,7 +1,11 @@
 import pytest
 
 from db.models import UserWord, Word, WordVariant
-from db.queries import add_new_word, get_user_words_with_variants
+from db.queries import (
+    add_new_word,
+    get_user_words_with_variants,
+    get_word_with_variants_by_name,
+)
 from db.tests.factories import UserFactory, WordFactory
 
 
@@ -59,3 +63,28 @@ async def test_get_user_words_with_variants(use_db):
         assert word.variants[0].definition == "test1"
         assert word.variants[1].part_of_speech == "adjective"
         assert word.variants[1].definition == "test2"
+
+
+@pytest.mark.asyncio
+async def test_get_word_with_variants_by_name(use_db):
+    words = ["banana", "peach", "watermelon"]
+    for name in words:
+        word = await WordFactory(
+            name=name,
+            variants=[
+                dict(part_of_speech="noun", definition="test1"),
+                dict(part_of_speech="adjective", definition="test2"),
+            ],
+        )
+
+    word = await get_word_with_variants_by_name("peach")
+
+    assert word.name == "peach"
+    assert word.variants[0].part_of_speech == "noun"
+    assert word.variants[0].definition == "test1"
+    assert word.variants[1].part_of_speech == "adjective"
+    assert word.variants[1].definition == "test2"
+
+    unexisting = await get_word_with_variants_by_name("unexisting")
+
+    assert unexisting is None

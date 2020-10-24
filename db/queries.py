@@ -25,3 +25,17 @@ async def get_user_words_with_variants(user_id: int):
         .query.where(Word.id.in_(user_words))
         .gino.all()
     )
+
+
+async def get_word_with_variants_by_name(name: str):
+    result = (
+        await Word.distinct(Word.id)
+        .load(add_variant=WordVariant)
+        .query.where(Word.name == name)
+        .gino.all()
+    )
+
+    if result:
+        return result[0]
+
+    return None
