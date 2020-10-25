@@ -14,9 +14,6 @@ export const actions: ActionTree<RootState, any> = {
       .then(response => {
         const token = response.data.access_token;
 
-        apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-        localStorage.setItem("token", token);
         store.commit("setToken", { token: token });
 
         router.push("/");
@@ -30,7 +27,6 @@ export const actions: ActionTree<RootState, any> = {
           msg = "Server error. Please, try later";
         }
 
-        localStorage.removeItem("token");
         store.commit("authError", { msg: msg });
       });
   },
@@ -38,11 +34,15 @@ export const actions: ActionTree<RootState, any> = {
   signup(store, payload) {
     apiClient
       .post("/signup", {
-        username: payload.username,
+        email: payload.email,
         password: payload.password,
         repeatPassword: payload.repeatPassword
       })
-      .then(response => (store.state.token = response.data.access_token));
+      .then(response => {
+        const token = response.data.access_token;
+
+        store.commit("setToken", { token: token });
+      });
   },
 
   getWords(store) {
