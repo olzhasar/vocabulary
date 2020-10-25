@@ -51,7 +51,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     )
     if not user:
         raise HTTPException(
-            status.HTTP_401_UNAUTHORIZED, "Invalid login credentials"
+            status.HTTP_400_BAD_REQUEST, "Invalid login credentials"
         )
 
     access_token = generate_access_token(email=user.email)
