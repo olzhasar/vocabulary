@@ -47,7 +47,7 @@ async def test_bad_login(client, use_db):
         data=dict(username="vincent@vega.com", password="wrongpassword"),
     )
 
-    assert response.status_code == 422
+    assert response.status_code == 401
 
 
 @pytest.mark.asyncio
