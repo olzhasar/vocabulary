@@ -21,7 +21,7 @@ export const actions: ActionTree<RootState, any> = {
       .catch(err => {
         let msg: string;
 
-        if (err.response && err.response.status === 422) {
+        if (err.response && err.response.status === 401) {
           msg = "Invalid credentials";
         } else {
           msg = "Server error. Please, try later";
@@ -36,7 +36,7 @@ export const actions: ActionTree<RootState, any> = {
       .post("/signup", {
         email: payload.email,
         password: payload.password,
-        repeatPassword: payload.repeatPassword
+        repeat_password: payload.repeatPassword // eslint-disable-line
       })
       .then(response => {
         const token = response.data.access_token;
