@@ -1,14 +1,7 @@
 from typing import Any, Dict, Optional
 
 from asyncpg.exceptions import UniqueViolationError
-from fastapi import (
-    APIRouter,
-    BackgroundTasks,
-    Depends,
-    FastAPI,
-    HTTPException,
-    status,
-)
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from db import queries
@@ -88,7 +81,6 @@ async def word_list(current_user: User = Depends(get_current_user)):
 @router.get("/search/{name}", response_model=WordSchema)
 async def word_search(
     name: str,
-    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
 ):
     word = await queries.get_word_with_variants_by_name(name)
@@ -114,7 +106,6 @@ async def word_search(
 @router.post("/words/{word_id}", status_code=status.HTTP_201_CREATED)
 async def word_add(
     word_id: int,
-    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
 ):
     word = await Word.get(word_id)
