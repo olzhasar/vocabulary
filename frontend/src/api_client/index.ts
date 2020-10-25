@@ -1,9 +1,19 @@
 import axios from "axios";
+import { AxiosTransformer } from "axios";
 import router from "../router";
+import humps from "humps";
 
 const apiClient = axios.create({
   baseURL: "http://localhost:8000",
-  timeout: 5000
+  timeout: 5000,
+  transformResponse: [
+    ...(axios.defaults.transformResponse as AxiosTransformer[]),
+    data => humps.camelizeKeys(data)
+  ],
+  transformRequest: [
+    data => humps.decamelizeKeys(data),
+    ...(axios.defaults.transformRequest as AxiosTransformer[])
+  ]
 });
 
 const token = localStorage.getItem("token");
