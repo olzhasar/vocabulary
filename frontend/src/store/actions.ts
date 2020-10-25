@@ -1,48 +1,56 @@
 import { ActionTree } from "vuex";
 import apiClient from "../api_client";
 import { RootState } from "../types";
-import router from "../router";
 
 export const actions: ActionTree<RootState, any> = {
   login(store, payload) {
-    const formData = new FormData();
-    formData.append("username", payload.email);
-    formData.append("password", payload.password);
+    return new Promise((resolve, reject) => {
+      const formData = new FormData();
+      formData.append("username", payload.email);
+      formData.append("password", payload.password);
 
-    apiClient
-      .post("/token", formData)
-      .then(response => {
-        const token = response.data.access_token;
+      apiClient
+        .post("/token", formData)
+        .then(response => {
+          const token = response.data.access_token;
+          store.commit("setToken", { token: token });
 
-        store.commit("setToken", { token: token });
-
-        router.push("/");
-      })
-      .catch(err => {
-        let msg: string;
-
-        if (err.response && err.response.status === 401) {
-          msg = "Invalid credentials";
-        } else {
-          msg = "Server error. Please, try later";
-        }
-
-        store.commit("authError", { msg: msg });
-      });
+          resolve();
+        })
+        .catch(err => {
+          console.log(err);
+          if (err.response && err.response.status === 401) {
+            reject("Invalid credentials");
+          } else {
+            reject("Unexpected server error. Please, try later");
+          }
+        });
+    });
   },
 
   signup(store, payload) {
-    apiClient
-      .post("/signup", {
-        email: payload.email,
-        password: payload.password,
-        repeat_password: payload.repeatPassword // eslint-disable-line
-      })
-      .then(response => {
-        const token = response.data.access_token;
+    return new Promise((resolve, reject) => {
+      apiClient
+        .post("/signup", {
+          email: payload.email,
+          password: payload.password,
+          repeat_password: payload.repeatPassword // eslint-disable-line
+        })
+        .then(response => {
+          const token = response.data.access_token;
 
-        store.commit("setToken", { token: token });
-      });
+          store.commit("setToken", { token: token });
+
+          resolve();
+        })
+        .catch(err => {
+          if (err.response && err.response.status === 409) {
+            reject("This email is already registered. Please, login instead");
+          } else {
+            reject("Unexpected server error. Please, try later");
+          }
+        });
+    });
   },
 
   getWords(store) {

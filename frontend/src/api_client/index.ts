@@ -17,7 +17,10 @@ apiClient.interceptors.response.use(
     return response;
   },
   function(error) {
-    if (error.response.status === 401) {
+    if (
+      error.response.status === 401 &&
+      error.response.data.detail === "Not authenticated"
+    ) {
       router.push("/login");
     } else {
       throw error;

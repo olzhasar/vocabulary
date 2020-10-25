@@ -29,8 +29,8 @@
                 required
               ></v-text-field>
 
-              <div class="red--text" v-if="this.$store.state.authError">
-                {{ this.error }}
+              <div class="red--text" v-if="error">
+                {{ error }}
               </div>
 
               <v-btn color="info" class="mr-4" type="submit">
@@ -58,17 +58,21 @@ export default Vue.extend({
   },
   methods: {
     signup: function() {
+      if (this.password != this.repeatPassword) {
+        this.error = "Passwords mismatch";
+        return;
+      }
+
       const email = this.email;
       const password = this.password;
       const repeatPassword = this.repeatPassword;
       this.$store
         .dispatch("signup", { email, password, repeatPassword })
-        .then(() => this.$router.push("/"))
+        .then(() => {
+          this.$router.push("/");
+        })
         .catch(err => {
-          if (err.response && err.response.status === 409) {
-            this.error =
-              "This email is already registered. Please, login instead";
-          }
+          this.error = err;
         });
     }
   }

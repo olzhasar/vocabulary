@@ -21,8 +21,8 @@
                 required
               ></v-text-field>
 
-              <div class="red--text" v-if="this.$store.state.authError">
-                {{ this.$store.state.authError }}
+              <div class="red--text" v-if="error">
+                {{ error }}
               </div>
 
               <v-btn color="info" class="mr-4" type="submit">
@@ -51,7 +51,14 @@ export default Vue.extend({
     login: function() {
       const email = this.email;
       const password = this.password;
-      this.$store.dispatch("login", { email, password });
+      this.$store
+        .dispatch("login", { email, password })
+        .then(() => {
+          this.$router.push("/");
+        })
+        .catch(err => {
+          this.error = err;
+        });
     }
   }
 });
