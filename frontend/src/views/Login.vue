@@ -4,9 +4,9 @@
       <v-container fluid fill-height>
         <v-layout align-center justify-center>
           <v-flex xs12 sm8 md4>
-            <v-form @submit.prevent="login" ref="form">
-              <h1>Vocabulary</h1>
+            <h1>Vocabulary</h1>
 
+            <v-form @submit.prevent="login" ref="form">
               <v-text-field
                 v-model="email"
                 label="Email"
@@ -29,6 +29,12 @@
                 Login
               </v-btn>
             </v-form>
+
+            <br />
+            Don't have an account yet?
+            <router-link to="/signup">
+              Sign up
+            </router-link>
           </v-flex>
         </v-layout>
       </v-container>
