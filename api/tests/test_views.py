@@ -63,6 +63,10 @@ async def test_signup(client, use_db):
 
     assert response.status_code == 201
 
+    response_json = response.json()
+    assert "access_token" in response_json
+    assert "token_type" in response_json
+
     user_from_db = await User.query.where(
         User.email == "vincent@vega.com"
     ).gino.first()

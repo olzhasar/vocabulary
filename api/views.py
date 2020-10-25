@@ -22,8 +22,8 @@ from words_api.client import (
 from .auth import generate_access_token, get_current_user
 from .schema import (
     SignupSchema,
+    TokenSchema,
     UserInSchema,
-    UserOutSchema,
     WordAPISchema,
     WordListSchema,
     WordSchema,
@@ -44,7 +44,7 @@ class WordNotFound(HTTPException):
         )
 
 
-@router.post("/token")
+@router.post("/token", response_model=TokenSchema)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await User.authenticate(
         username=form_data.username, password=form_data.password
@@ -59,7 +59,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/signup", response_model=UserOutSchema, status_code=201)
+@router.post("/signup", response_model=TokenSchema, status_code=201)
 async def signup(data: SignupSchema):
     params = UserInSchema(**data.dict())
 
@@ -69,7 +69,9 @@ async def signup(data: SignupSchema):
 
     user = await User.register(**params.dict())
 
-    return user.__values__
+    access_token = generate_access_token(email=user.email)
+
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.get("/words", response_model=WordListSchema)

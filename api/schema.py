@@ -15,6 +15,11 @@ class UserOutSchema(UserSchema):
     pass
 
 
+class TokenSchema(BaseModel):
+    access_token: str
+    token_type: str
+
+
 class SignupSchema(UserInSchema):
     password: constr(min_length=8)
     repeat_password: str
