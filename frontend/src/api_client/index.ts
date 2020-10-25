@@ -1,5 +1,6 @@
 import axios from "axios";
 import router from "../router";
+import store from "../store";
 
 const apiClient = axios.create({
   baseURL: "http://localhost:8000",
@@ -17,10 +18,8 @@ apiClient.interceptors.response.use(
     return response;
   },
   function(error) {
-    if (
-      error.response.status === 401 &&
-      error.response.data.detail === "Not authenticated"
-    ) {
+    if (error.response.status === 401) {
+      store.commit("removeToken");
       router.push("/login");
     } else {
       throw error;

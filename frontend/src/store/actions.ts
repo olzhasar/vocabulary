@@ -18,7 +18,7 @@ export const actions: ActionTree<RootState, any> = {
           resolve();
         })
         .catch(err => {
-          if (err.response && err.response.status === 401) {
+          if (err.response && err.response.status === 400) {
             reject("Invalid credentials");
           } else {
             reject("Unexpected server error. Please, try later");

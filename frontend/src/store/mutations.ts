@@ -10,6 +10,11 @@ export const mutations: MutationTree<RootState> = {
       "Authorization"
     ] = `Bearer ${payload.token}`;
   },
+  removeToken(store) {
+    store.token = null;
+    localStorage.removeItem("token");
+    delete apiClient.defaults.headers.common["Authorization"];
+  },
   setWords(store, payload) {
     store.words = payload.words;
   }
