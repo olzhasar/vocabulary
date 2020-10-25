@@ -1,9 +1,13 @@
 <template>
   <div class="home">
+    <v-app-bar flat dense color="dark" dark>
+      <v-toolbar-title>Vocabulary</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn v-on:click="logout">Logout</v-btn>
+    </v-app-bar>
     <v-container fluid fill-height>
       <v-layout align-center justify-center>
         <v-flex xs12 sm8 md6>
-          <div class="text-h5 text-center mb-6">Vocabulary</div>
           <search></search>
 
           <div v-if="this.$store.state.words.length">
@@ -38,6 +42,13 @@
         </v-flex>
       </v-layout>
     </v-container>
+    <v-card elevation="0" height="150">
+      <v-footer absolute class="font-weight-medium" color="dark" dark>
+        <v-col class="text-center" cols="12">
+          Created by <a href="https://github.com/olzhasar/">Olzhas Arystanov</a>
+        </v-col>
+      </v-footer>
+    </v-card>
   </div>
 </template>
 
@@ -61,6 +72,10 @@ export default Vue.extend({
   methods: {
     loadWords: function() {
       this.$store.dispatch("getWords");
+    },
+    logout: function() {
+      this.$store.commit("removeToken");
+      this.$router.push("/login");
     }
   },
   mounted() {
