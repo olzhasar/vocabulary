@@ -18,7 +18,6 @@ export const actions: ActionTree<RootState, any> = {
           resolve();
         })
         .catch(err => {
-          console.log(err);
           if (err.response && err.response.status === 401) {
             reject("Invalid credentials");
           } else {
