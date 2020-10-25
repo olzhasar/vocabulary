@@ -7,23 +7,31 @@ verify_ssl = true
 black = "*"
 isort = "*"
 flake8 = "*"
+
+httpx = "*"
+
 pytest = "*"
 pytest-asyncio = "*"
-factory-boy = "*"
-httpx = "*"
 pytest-mock = "*"
+factory-boy = "*"
 
 [packages]
 fastapi = "*"
-uvicorn = "*"
-sqlalchemy = "*"
-alembic = "*"
-aiohttp = {extras = ["speedups"], version = "*"}
-bcrypt = "*"
 pydantic = {extras = ["dotenv", "email"], version = "*"}
-python-multipart = "*"
+
+alembic = "*"
+sqlalchemy = "*"
 gino = {extras = ["starlette"], version = "*"}
+
+bcrypt = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
+
+aiohttp = {extras = ["speedups"], version = "*"}
+
+python-multipart = "*"
+
+uvicorn = {extras = ["standard"], version = "*"}
+gunicorn = "*"
 
 [requires]
 python_version = "3.8"
