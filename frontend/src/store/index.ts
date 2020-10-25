@@ -10,7 +10,6 @@ Vue.use(Vuex);
 const store: StoreOptions<RootState> = {
   state: {
     token: localStorage.getItem("token"),
-    authError: null,
     words: []
   },
   actions: actions,
