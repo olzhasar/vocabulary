@@ -18,13 +18,19 @@ const routes: Array<RouteConfig> = [
     path: "/login",
     name: "Login",
     component: () =>
-      import(/* webpackChunkName: "login" */ "../views/Login.vue")
+      import(/* webpackChunkName: "login" */ "../views/Login.vue"),
+    meta: {
+      authRoute: true
+    }
   },
   {
     path: "/signup",
     name: "Signup",
     component: () =>
-      import(/* webpackChunkName: "signup" */ "../views/Signup.vue")
+      import(/* webpackChunkName: "signup" */ "../views/Signup.vue"),
+    meta: {
+      authRoute: true
+    }
   }
 ];
 
@@ -36,11 +42,16 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (store.getters.isLoggedIn) {
+    if (!store.getters.isLoggedIn) {
+      next("/login");
+    } else {
       next();
-      return;
     }
-    next("/login");
+  } else if (
+    to.matched.some(record => record.meta.authRoute) &&
+    store.getters.isLoggedIn
+  ) {
+    next("/");
   } else {
     next();
   }
